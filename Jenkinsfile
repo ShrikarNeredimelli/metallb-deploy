@@ -1,11 +1,9 @@
 pipeline {
     agent any 
-
     environment {
-        GITHUB_URL = 'https://github.com/ShrikarNeredimelli/metallb-deploy'  // <---- Change this to match your cloned repository
-        KUBECONFIG = credentials('neredis-225-sp26')   // <---- Change this to match your kubernetes cluster credentials
+        GITHUB_URL = 'https://github.com/ShrikarNeredimelli/metallb-deploy'
+        KUBECONFIG = credentials('neredis-225-sp26')
     }
-
     stages {
         stage('Checkout') {
             steps {
@@ -17,6 +15,7 @@ pipeline {
             steps {
                 script {
                     sh "kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml"
+                    sh "kubectl wait --namespace metallb-system --for=condition=ready pod --selector=app=metallb --timeout=90s"
                     sh "kubectl apply -f l2advertisement.yaml -n metallb-system"
                     sh "kubectl apply -f ipaddresses.yaml -n metallb-system"
                     sh "kubectl get IPAddressPool -A"
@@ -25,7 +24,6 @@ pipeline {
             }
         }
     }
-
     post {
         success {
             slackSend color: "good", message: "Build Completed: ${env.JOB_NAME} ${env.BUILD_NUMBER}"
