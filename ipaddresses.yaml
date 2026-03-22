@@ -4,5 +4,5 @@ metadata:
   name: main-pool
   namespace: metallb-system
 spec:
-  addresses:
-  - 10.48.229.200-10.48.229.210
+addresses:
+  - 10.48.228.113-10.48.228.113
